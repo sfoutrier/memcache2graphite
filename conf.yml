@@ -1,0 +1,24 @@
+freq : 1
+graphite :
+  root-path : toto.memcache.my_bucket.debian-sf
+  host : localhost
+  port : 3333
+  type : udp 
+memcache:
+  host : localhost 
+  port : 11220
+metrics:
+  ops : sum
+  hit_ratio : avg
+  bytes_read : sum
+  bytes_written : sum
+  cmd_get : sum
+  cmd_set : sum
+  curr_connections : avg
+  curr_items : avg
+  evictions : sum
+  get_hits : sum
+  get_misses : sum
+  mem_used : avg
+  cpu_utilization_rate : avg
+  ep_resident_items_rate : avg

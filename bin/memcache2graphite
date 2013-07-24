@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'simple-graphite'
+require 'dalli'
+require 'yaml'
+require 'eventmachine'
+
+conf = YAML.load_file(ARGV.fetch(0,"conf.yml"))
+
+graphite = Graphite.new({
+  :host => conf["graphite"]["host"], 
+  :port => conf["graphite"]["port"],
+  :type => conf["graphite"].fetch("type", "udp").to_sym
+  })
+
+memcache_conf = conf["memcache"]
+options = {}
+if memcache_conf["username"]
+  options[:username] = bucket["username"]
+end
+if memcache_conf["password"]
+  options[:password] = bucket["password"]
+end
+memcache = Dalli::Client.new("#{memcache_conf.fetch("host","localhost")}:#{memcache_conf.fetch("port",11211)}", options)
+
+def aggregate(metric, value, type, state)
+  if type == "sum"
+    prev = state[metric]
+    state[metric] = value
+    if prev
+      return value.to_f - prev.to_f
+    end
+  else
+    return value
+  end
+end
+
+def collect(conf, memcache, graphite, state)
+  metrics_filter = conf["metrics"]
+  message = {}
+  memcache.stats.each do |node, metrics|
+    metrics.select{|metric, value| metrics_filter.has_key?(metric)}.each do |metric, value|
+      to_send = aggregate(metric, value, metrics_filter[metric], state)
+      if to_send
+        message["#{conf["graphite"]["root-path"]}.#{metrics_filter[metric]}.#{metric}"] = value
+      end
+    end
+  end
+  graphite.send_metrics(message)
+end
+
+EventMachine.run {
+  state = {}
+  EventMachine.add_periodic_timer(conf.fetch("freq",1)) do
+     collect(conf, memcache, graphite, state)
+  end
+}
