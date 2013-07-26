@@ -16,10 +16,10 @@ graphite = Graphite.new({
 memcache_conf = conf["memcache"]
 options = {}
 if memcache_conf["username"]
-  options[:username] = bucket["username"]
+  options[:username] = memcache_conf["username"]
 end
 if memcache_conf["password"]
-  options[:password] = bucket["password"]
+  options[:password] = memcache_conf["password"]
 end
 memcache = Dalli::Client.new("#{memcache_conf.fetch("host","localhost")}:#{memcache_conf.fetch("port",11211)}", options)
 
