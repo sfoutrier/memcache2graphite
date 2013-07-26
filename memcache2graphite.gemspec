@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'memcache2graphite'
-  s.version     = '1.0.1'
+  s.version     = '1.1.0'
   s.date        = '2013-07-23'
   s.summary     = "Dumps filtered stats a single memcached instance to a graphite server"
   s.description = "Dumps filtered stats a single memcached instance to a graphite server"

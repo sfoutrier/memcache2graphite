@@ -1,6 +1,6 @@
 freq : 1
 graphite :
-  root-path : toto.memcache.my_bucket.debian-sf
+  root-path : toto.memcache.my_bucket.<type>.debian-sf
   host : localhost
   port : 3333
   type : udp 

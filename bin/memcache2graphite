@@ -40,9 +40,10 @@ def collect(conf, memcache, graphite, state)
   message = {}
   memcache.stats.each do |node, metrics|
     metrics.select{|metric, value| metrics_filter.has_key?(metric)}.each do |metric, value|
-      to_send = aggregate(metric, value, metrics_filter[metric], state)
+      type = metrics_filter[metric]
+      to_send = aggregate(metric, value, type, state)
       if to_send
-        message["#{conf["graphite"]["root-path"]}.#{metrics_filter[metric]}.#{metric}"] = value
+        message["#{conf["graphite"]["root-path"].gsub(/<type>/,type)}.#{metrics_filter[metric]}.#{metric}"] = value
       end
     end
   end
