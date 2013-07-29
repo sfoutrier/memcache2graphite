@@ -4,8 +4,9 @@ require 'simple-graphite'
 require 'dalli'
 require 'yaml'
 require 'eventmachine'
+require 'daemons'
 
-conf = YAML.load_file(ARGV.fetch(0,"conf.yml"))
+conf = YAML.load_file(ARGV.fetch(1,"conf.yml"))
 
 graphite = Graphite.new({
   :host => conf["graphite"]["host"], 
@@ -38,7 +39,7 @@ end
 def collect(conf, memcache, graphite, state)
   metrics_filter = conf["metrics"]
   message = {}
-  memcache.stats.each do |node, metrics|
+  memcache.stats.select{|node, metrics| metrics}.each do |node, metrics|
     metrics.select{|metric, value| metrics_filter.has_key?(metric)}.each do |metric, value|
       type = metrics_filter[metric]
       to_send = aggregate(metric, value, type, state)
@@ -50,9 +51,22 @@ def collect(conf, memcache, graphite, state)
   graphite.send_metrics(message)
 end
 
-EventMachine.run {
-  state = {}
-  EventMachine.add_periodic_timer(conf.fetch("freq",1)) do
-     collect(conf, memcache, graphite, state)
-  end
-}
+def run_timer(conf, memcache, graphite)
+  EventMachine.run {
+    state = {}
+    EventMachine.add_periodic_timer(conf.fetch("freq",1)) do
+      collect(conf, memcache, graphite, state)
+    end
+  }
+end
+
+Daemons.run_proc(conf.fetch("daemon_name", "memcache2graphite"), 
+  {
+    :ontop => !conf["daemon_name"],
+    :dir_mode => :system,
+    :log_dir => conf["log_dir"],
+    :log_output => true,
+    :dir => conf["pid_dir"]
+  }) do
+  run_timer(conf, memcache, graphite)
+end
