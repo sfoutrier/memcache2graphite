@@ -66,7 +66,8 @@ Daemons.run_proc(conf.fetch("daemon_name", "memcache2graphite"),
     :dir_mode => :normal,
     :log_dir => conf["log_dir"],
     :log_output => true,
-    :dir => conf["pid_dir"]
+    :dir => conf["pid_dir"],
+    :monitor => true,
   }) do
   run_timer(conf, memcache, graphite)
 end
