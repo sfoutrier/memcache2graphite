@@ -3,7 +3,7 @@ daemon_name : memcache2graphite_daemon
 log_dir : /var/log/memcache2graphite/
 pid_dir : /var/run/memcache2graphite/
 graphite :
-  root-path : toto.memcache.my_bucket.<type>.debian-sf
+  path : toto.memcache.my_bucket.<type>.debian-sf
   host : localhost
   port : 3333
   type : udp 

@@ -44,7 +44,7 @@ def collect(conf, memcache, graphite, state)
       type = metrics_filter[metric]
       to_send = aggregate(metric, value, type, state)
       if to_send
-        message[conf["graphite"]["path"].gsub(/<type>/,type).gsub(/<metric>/,metric)] = value
+        message[conf["graphite"]["path"].gsub(/<type>/,type).gsub(/<metric>/,metric)] = to_send
       end
     end
   end
